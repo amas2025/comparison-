@@ -9,55 +9,30 @@ st.title("Excel Sales Comparison App")
 file1 = st.file_uploader("Upload the first Excel file", type="xlsx")
 file2 = st.file_uploader("Upload the second Excel file", type="xlsx")
 
-if file1:
+if file1 and file2:
     try:
-        # Read the first Excel file using openpyxl engine
+        # Read the Excel files using openpyxl engine
         df1 = pd.read_excel(file1, engine='openpyxl')
+        df2 = pd.read_excel(file2, engine='openpyxl')
 
         st.write("### Preview of the first file")
         st.write(df1.head())
 
-    except Exception as e:
-        st.error(f"An error occurred while processing the first file: {e}")
-
-if file2:
-    try:
-        # Read the second Excel file using openpyxl engine
-        df2 = pd.read_excel(file2, engine='openpyxl')
-
         st.write("### Preview of the second file")
         st.write(df2.head())
 
-        # Ensure the second DataFrame has the required columns
-        if "quantity" in df2.columns and "item" in df2.columns:
-
-            # Convert quantity column to numeric, handling large integers
-            df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(np.int64)
-
-            # Automatically display items with sales less than 6
-            low_sales_items = df2[df2["quantity"] < 6]
-            if not low_sales_items.empty:
-                st.warning("Items in the second file with sales less than 6:")
-                st.write(low_sales_items)
-
-        else:
-            st.error("The second file must have 'item' and 'quantity' columns.")
-
-    except Exception as e:
-        st.error(f"An error occurred while processing the second file: {e}")
-
-if file1 and file2:
-    try:
         # Input boxes for specifying sales quantities
         st.sidebar.header("Specify Sales Quantities")
         quantity1 = st.sidebar.number_input("Minimum sales quantity for the first file", min_value=0, value=50)
         quantity2 = st.sidebar.number_input("Maximum sales quantity for the second file", min_value=0, value=100)
 
-        # Ensure the first DataFrame has the required columns
-        if "quantity" in df1.columns and "item" in df1.columns:
+        # Ensure the DataFrame has the required columns
+        if "quantity" in df1.columns and "item" in df1.columns and \
+           "quantity" in df2.columns and "item" in df2.columns:
 
-            # Convert quantity column to numeric, handling large integers
+            # Convert quantity columns to numeric, handling large integers
             df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(np.int64)
+            df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(np.int64)
 
             # Filter data based on sales quantities
             df1_filtered = df1[df1["quantity"] >= quantity1]
@@ -75,8 +50,17 @@ if file1 and file2:
             st.write("### Matched items in the second file")
             st.write(df2_filtered)
 
+            # Notification for items sold less than 6 in the second file
+            low_sales_items = df2[df2["quantity"] < 6]
+            if not low_sales_items.empty:
+                st.warning("Items in the second file with sales less than 6:")
+                st.write(low_sales_items)
+
         else:
-            st.error("The first file must have 'item' and 'quantity' columns.")
+            st.error("Ensure both files have 'item' and 'quantity' columns.")
 
     except Exception as e:
-        st.error(f"An error occurred during processing: {e}")
+        st.error(f"An error occurred: {e}")
+
+else:
+    st.info("Please upload both Excel files to proceed.")
