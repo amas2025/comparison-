@@ -13,6 +13,9 @@ file2 = st.file_uploader("Upload the second Excel file", type="xlsx")
 st.sidebar.header("Notifications")
 notification_message = st.sidebar.empty()
 
+# Button to view items with sales less than 20
+show_low_sales_button = st.sidebar.button("Show Items with Sales < 20")
+
 if file1 and file2:
     try:
         # Read the Excel files using openpyxl engine
@@ -58,7 +61,11 @@ if file1 and file2:
             low_sales_items = df2[df2["quantity"] < 20]
             if not low_sales_items.empty:
                 notification_message.warning("Items in the second file with sales less than 20:")
-                st.write(low_sales_items)
+
+                # Show the low sales items in a window when the button is clicked
+                if show_low_sales_button:
+                    st.write("### Items in the second file with sales less than 20")
+                    st.write(low_sales_items)
 
         else:
             st.error("Ensure both files have 'item' and 'quantity' columns.")
