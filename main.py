@@ -35,7 +35,8 @@ if file1 and file2:
             # Filter the second file for items matching the first file's filtered results
             matched_items = df1_filtered["item"].unique()
             df2_filtered = df2[(df2["item"].isin(matched_items)) &
-                               (df2["quantity"] <= quantity2)]
+                               (df2["quantity"] <= quantity2) &
+                               (df2["quantity"] >= 0)]  # Ensure 0 quantity is included
 
             # Display results
             st.write("### Filtered items from the first file")
