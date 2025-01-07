@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 # Streamlit app title
 st.title("Excel Sales Comparison App")
@@ -28,6 +29,10 @@ if file1 and file2:
         # Ensure the DataFrame has the required columns
         if "quantity" in df1.columns and "item" in df1.columns and \
            "quantity" in df2.columns and "item" in df2.columns:
+
+            # Convert quantity columns to numeric, handling large integers
+            df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(np.int64)
+            df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(np.int64)
 
             # Filter data based on sales quantities
             df1_filtered = df1[df1["quantity"] >= quantity1]
