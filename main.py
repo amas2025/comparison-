@@ -9,6 +9,10 @@ st.title("Excel Sales Comparison App")
 file1 = st.file_uploader("Upload the first Excel file", type="xlsx")
 file2 = st.file_uploader("Upload the second Excel file", type="xlsx")
 
+# Notification section below input boxes
+st.sidebar.header("Notifications")
+notification_message = st.sidebar.empty()
+
 if file1 and file2:
     try:
         # Read the Excel files using openpyxl engine
@@ -50,10 +54,10 @@ if file1 and file2:
             st.write("### Matched items in the second file")
             st.write(df2_filtered)
 
-            # Notification for items sold less than 6 in the second file
-            low_sales_items = df2[df2["quantity"] < 6]
+            # Notification for items sold less than 20 in the second file
+            low_sales_items = df2[df2["quantity"] < 20]
             if not low_sales_items.empty:
-                st.warning("Items in the second file with sales less than 6:")
+                notification_message.warning("Items in the second file with sales less than 20:")
                 st.write(low_sales_items)
 
         else:
