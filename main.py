@@ -23,7 +23,7 @@ if file1 and file2:
         # Input boxes for specifying sales quantities
         st.sidebar.header("Specify Sales Quantities")
         quantity1 = st.sidebar.number_input("Minimum sales quantity for the first file", min_value=0, value=50)
-        quantity2 = st.sidebar.number_input("Minimum sales quantity for the second file", min_value=0, value=0)
+        quantity2 = st.sidebar.number_input("Maximum sales quantity for the second file", min_value=0, value=100)
 
         # Date pickers for selecting date ranges
         st.sidebar.header("Select Date Ranges")
@@ -49,7 +49,7 @@ if file1 and file2:
                 # Filter the second file for items matching the first file's filtered results
                 matched_items = df1_filtered["item"].unique()
                 df2_filtered = df2_filtered[(df2_filtered["item"].isin(matched_items)) &
-                                             (df2_filtered["quantity"] >= quantity2)]
+                                             (df2_filtered["quantity"] <= quantity2)]
 
                 # Display results
                 st.write("### Filtered items from the first file")
