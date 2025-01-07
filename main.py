@@ -45,6 +45,12 @@ if file1 and file2:
             st.write("### Matched items in the second file")
             st.write(df2_filtered)
 
+            # Notification for items sold less than 6 in the second file
+            low_sales_items = df2[df2["quantity"] < 6]
+            if not low_sales_items.empty:
+                st.warning("Items in the second file with sales less than 6:")
+                st.write(low_sales_items)
+
         else:
             st.error("Ensure both files have 'item' and 'quantity' columns.")
 
