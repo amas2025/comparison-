@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from io import BytesIO
 
 # Streamlit app title
 st.title("Excel Sales Comparison App")
@@ -66,6 +67,37 @@ if file1 and file2:
                 if show_low_sales_button:
                     st.write("### Items in the second file with sales less than 20")
                     st.write(low_sales_items)
+
+            # Export functionality
+            def to_excel(df):
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    df.to_excel(writer, index=False, sheet_name='Sheet1')
+                    writer.save()
+                processed_data = output.getvalue()
+                return processed_data
+
+            st.sidebar.header("Export Filtered Data")
+            if not df1_filtered.empty:
+                df1_excel = to_excel(df1_filtered)
+                st.sidebar.download_button(label="Download Filtered File 1", 
+                                           data=df1_excel, 
+                                           file_name="filtered_file1.xlsx", 
+                                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+            if not df2_filtered.empty:
+                df2_excel = to_excel(df2_filtered)
+                st.sidebar.download_button(label="Download Filtered File 2", 
+                                           data=df2_excel, 
+                                           file_name="filtered_file2.xlsx", 
+                                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+            if not low_sales_items.empty:
+                low_sales_excel = to_excel(low_sales_items)
+                st.sidebar.download_button(label="Download Low Sales Items", 
+                                           data=low_sales_excel, 
+                                           file_name="low_sales_items.xlsx", 
+                                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
         else:
             st.error("Ensure both files have 'item' and 'quantity' columns.")
