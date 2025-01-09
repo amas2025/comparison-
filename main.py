@@ -73,7 +73,7 @@ if file1 and file2:
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     df.to_excel(writer, index=False, sheet_name='Sheet1')
-                    writer.save()
+                    writer.close()  # Correctly close the writer
                 processed_data = output.getvalue()
                 return processed_data
 
