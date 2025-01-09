@@ -39,20 +39,33 @@ if file1 and file2:
            "quantity" in df2.columns and "item" in df2.columns:
 
             # Convert quantity columns to numeric, handling large integers
-            df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(np.int64)
-            df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(np.int64)
+            df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(int)
+            df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(int)
 
             # Filter data based on sales quantities
             df1_filtered = df1[df1["quantity"] >= quantity1]
 
-            # Filter the second file for items matching the first file's filtered results
+            # Extract matched items from the first file
             matched_items = df1_filtered["item"].unique()
-            df2_filtered = df2[
-                (df2["item"].isin(matched_items)) &
-                (
-                    (df2["quantity"] <= quantity2) | (df2["quantity"] == 0)
-                )
-            ]
+
+            # Debugging: Check matched_items
+            st.write("Debugging: Matched items from the first file", matched_items)
+
+            # Filter the second file for items matching the first file's filtered results
+            if quantity2 == 0:
+                df2_filtered = df2[
+                    (df2["item"].isin(matched_items)) &
+                    (df2["quantity"] == 0)
+                ]
+            else:
+                df2_filtered = df2[
+                    (df2["item"].isin(matched_items)) &
+                    (df2["quantity"] <= quantity2)
+                ]
+
+            # Debugging: Check the filtered DataFrame
+            st.write("Debugging: Filtered DataFrame in the second file")
+            st.write(df2_filtered)
 
             # Display results
             st.write("### Filtered items from the first file")
