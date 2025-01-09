@@ -50,7 +50,7 @@ if file1 and file2:
             df2_filtered = df2[
                 (df2["item"].isin(matched_items)) &
                 (
-                    (df2["quantity"] <= quantity2) if quantity2 > 0 else (df2["quantity"] == 0)
+                    (df2["quantity"] <= quantity2) | (df2["quantity"] == 0)
                 )
             ]
 
