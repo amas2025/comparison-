@@ -52,16 +52,12 @@ if file1 and file2:
             st.write("Debugging: Matched items from the first file", matched_items)
 
             # Filter the second file for items matching the first file's filtered results
-            if quantity2 == 0:
-                df2_filtered = df2[
-                    (df2["item"].isin(matched_items)) &
-                    (df2["quantity"] == 0)
-                ]
-            else:
-                df2_filtered = df2[
-                    (df2["item"].isin(matched_items)) &
-                    (df2["quantity"] <= quantity2)
-                ]
+            df2_filtered = df2[
+                (df2["item"].isin(matched_items)) &
+                (
+                    (df2["quantity"] <= quantity2) | (quantity2 == 0)
+                )
+            ]
 
             # Debugging: Check the filtered DataFrame
             st.write("Debugging: Filtered DataFrame in the second file")
