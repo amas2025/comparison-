@@ -19,7 +19,7 @@ show_low_sales_button = st.sidebar.button("Show Items with Sales < 20")
 
 if file1 and file2:
     try:
-        # Read the Excel files using openpyxl engine
+        # Read the Excel files
         df1 = pd.read_excel(file1, engine='openpyxl')
         df2 = pd.read_excel(file2, engine='openpyxl')
 
@@ -38,9 +38,12 @@ if file1 and file2:
         if "quantity" in df1.columns and "item" in df1.columns and \
            "quantity" in df2.columns and "item" in df2.columns:
 
-            # Convert quantity columns to numeric, handling large integers
+            # Convert quantity columns to numeric, handling missing values
             df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(int)
             df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(int)
+
+            # Debugging: Display unique values in quantity
+            st.write("Unique values in df2['quantity']:", df2["quantity"].unique())
 
             # Filter data based on sales quantities
             df1_filtered = df1[df1["quantity"] >= quantity1]
@@ -48,19 +51,17 @@ if file1 and file2:
             # Extract matched items from the first file
             matched_items = df1_filtered["item"].unique()
 
-            # Debugging: Check matched_items
-            st.write("Debugging: Matched items from the first file", matched_items)
+            # Debugging: Display matched items
+            st.write("Matched items from the first file:", matched_items)
 
             # Filter the second file for items matching the first file's filtered results
             df2_filtered = df2[
                 (df2["item"].isin(matched_items)) &
-                (
-                    (df2["quantity"] <= quantity2) | (df2["quantity"] <= 0)
-                )
+                ((df2["quantity"] <= quantity2) | (df2["quantity"] <= 0))
             ]
 
             # Debugging: Check the filtered DataFrame
-            st.write("Debugging: Filtered DataFrame in the second file")
+            st.write("Filtered items in the second file:")
             st.write(df2_filtered)
 
             # Display results
@@ -74,8 +75,6 @@ if file1 and file2:
             low_sales_items = df2[df2["quantity"] < 20]
             if not low_sales_items.empty:
                 notification_message.warning("Items in the second file with sales less than 20:")
-
-                # Show the low sales items in a window when the button is clicked
                 if show_low_sales_button:
                     st.write("### Items in the second file with sales less than 20")
                     st.write(low_sales_items)
@@ -85,30 +84,29 @@ if file1 and file2:
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     df.to_excel(writer, index=False, sheet_name='Sheet1')
-                    writer.close()  # Correctly close the writer
-                processed_data = output.getvalue()
-                return processed_data
+                    writer.close()
+                return output.getvalue()
 
             st.sidebar.header("Export Filtered Data")
             if not df1_filtered.empty:
                 df1_excel = to_excel(df1_filtered)
-                st.sidebar.download_button(label="Download Filtered File 1", 
-                                           data=df1_excel, 
-                                           file_name="filtered_file1.xlsx", 
+                st.sidebar.download_button(label="Download Filtered File 1",
+                                           data=df1_excel,
+                                           file_name="filtered_file1.xlsx",
                                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
             if not df2_filtered.empty:
                 df2_excel = to_excel(df2_filtered)
-                st.sidebar.download_button(label="Download Filtered File 2", 
-                                           data=df2_excel, 
-                                           file_name="filtered_file2.xlsx", 
+                st.sidebar.download_button(label="Download Filtered File 2",
+                                           data=df2_excel,
+                                           file_name="filtered_file2.xlsx",
                                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
             if not low_sales_items.empty:
                 low_sales_excel = to_excel(low_sales_items)
-                st.sidebar.download_button(label="Download Low Sales Items", 
-                                           data=low_sales_excel, 
-                                           file_name="low_sales_items.xlsx", 
+                st.sidebar.download_button(label="Download Low Sales Items",
+                                           data=low_sales_excel,
+                                           file_name="low_sales_items.xlsx",
                                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
         else:
