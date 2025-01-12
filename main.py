@@ -71,8 +71,10 @@ if file1 and file2:
             st.write("### Filtered items from the first file")
             st.write(df1_filtered)
 
-            st.write("### Matched items in the second file")
-            st.write(df2_filtered)
+            # Display all rows of matched items in the second file
+st.write("### Matched items in the second file")
+st.dataframe(df2_filtered, use_container_width=True)
+
 
             # Notification for items sold less than 20 in the second file
             low_sales_items = df2[df2["quantity"] < 20]
