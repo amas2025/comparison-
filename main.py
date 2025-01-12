@@ -65,16 +65,25 @@ if file1 and file2:
 
             # Debugging: Check the filtered DataFrame
             st.write("Filtered items in the second file:")
-            st.write(df2_filtered)
+            st.dataframe(df2_filtered, use_container_width=True)
+
+            # Add a download button for full matched results
+            def to_csv(df):
+                return df.to_csv(index=False).encode('utf-8')
+
+            st.download_button(
+                label="Download Full Results as CSV",
+                data=to_csv(df2_filtered),
+                file_name="matched_items.csv",
+                mime="text/csv"
+            )
 
             # Display results
             st.write("### Filtered items from the first file")
             st.write(df1_filtered)
 
-            # Display all rows of matched items in the second file
-st.write("### Matched items in the second file")
-st.dataframe(df2_filtered, use_container_width=True)
-
+            st.write("### Matched items in the second file")
+            st.write(df2_filtered)
 
             # Notification for items sold less than 20 in the second file
             low_sales_items = df2[df2["quantity"] < 20]
