@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from io import BytesIO
+import matplotlib.pyplot as plt
 
 # Streamlit app title
 st.title("Excel Sales Comparison App")
@@ -23,11 +24,12 @@ if file1 and file2:
         df1 = pd.read_excel(file1, engine='openpyxl')
         df2 = pd.read_excel(file2, engine='openpyxl')
 
-        st.write("### Preview of the first file")
-        st.write(df1.head())
+        # File previews in collapsible sections
+        with st.expander("Preview the first file"):
+            st.write(df1.head())
 
-        st.write("### Preview of the second file")
-        st.write(df2.head())
+        with st.expander("Preview the second file"):
+            st.write(df2.head())
 
         # Input boxes for specifying sales quantities
         st.sidebar.header("Specify Sales Quantities")
@@ -42,30 +44,37 @@ if file1 and file2:
             df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(np.int64)
             df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(np.int64)
 
-            # Debugging: Check for large values
-            st.write("Maximum value in df1['quantity']:", df1["quantity"].max())
-            st.write("Maximum value in df2['quantity']:", df2["quantity"].max())
-
             # Filter data based on sales quantities
             df1_filtered = df1[df1["quantity"] >= quantity1]
-
-            # Extract matched items from the first file
             matched_items = df1_filtered["item"].unique()
-
-            # Debugging: Check matched_items
-            st.write("Debugging: Matched items from the first file", matched_items)
-
-            # Filter the second file for items matching the first file's filtered results
             df2_filtered = df2[
                 (df2["item"].isin(matched_items)) &
-                (
-                    (df2["quantity"] <= quantity2) | (df2["quantity"] <= 0)
-                )
+                ((df2["quantity"] <= quantity2) | (df2["quantity"] == 0))
             ]
 
-            # Ensure all rows are shown
+            # Matched items display with pie chart
             st.write("### Matched items in the second file (All Rows Including Zeros)")
             st.dataframe(df2_filtered, height=1000, use_container_width=True)
+
+            # Pie Chart Section
+            st.write("### Visualization of Matched Items")
+
+            # Toggle between visualizations
+            chart_type = st.radio("Select Pie Chart Type:", ["By Item Count", "By Total Quantity"], horizontal=True)
+
+            if chart_type == "By Item Count":
+                item_counts = df2_filtered["item"].value_counts()
+                fig, ax = plt.subplots()
+                ax.pie(item_counts, labels=item_counts.index, autopct="%1.1f%%", startangle=90, colors=plt.cm.Paired.colors)
+                ax.set_title("Distribution by Item Count")
+                st.pyplot(fig)
+
+            elif chart_type == "By Total Quantity":
+                quantity_sums = df2_filtered.groupby("item")["quantity"].sum()
+                fig, ax = plt.subplots()
+                ax.pie(quantity_sums, labels=quantity_sums.index, autopct="%1.1f%%", startangle=90, colors=plt.cm.Paired.colors)
+                ax.set_title("Distribution by Total Quantity")
+                st.pyplot(fig)
 
             # Add a download button for full matched results
             def to_csv(df):
@@ -78,20 +87,13 @@ if file1 and file2:
                 mime="text/csv"
             )
 
-            # Display results
-            st.write("### Filtered items from the first file")
-            st.write(df1_filtered)
-
-            st.write("### Matched items in the second file")
-            st.write(df2_filtered)
-
             # Notification for items sold less than 20 in the second file
             low_sales_items = df2[df2["quantity"] < 20]
             if not low_sales_items.empty:
                 notification_message.warning("Items in the second file with sales less than 20:")
                 if show_low_sales_button:
-                    st.write("### Items in the second file with sales less than 20")
-                    st.write(low_sales_items)
+                    with st.expander("Items with sales less than 20"):
+                        st.write(low_sales_items)
 
             # Export functionality
             def to_excel(df):
