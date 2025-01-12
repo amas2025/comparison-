@@ -63,9 +63,9 @@ if file1 and file2:
                 )
             ]
 
-            # Debugging: Check the filtered DataFrame
-            st.write("Filtered items in the second file:")
-            st.write(df2_filtered)
+            # Ensure all rows are shown
+            st.write("### Matched items in the second file (All Rows Including Zeros)")
+            st.dataframe(df2_filtered, height=1000, use_container_width=True)
 
             # Add a download button for full matched results
             def to_csv(df):
