@@ -19,7 +19,7 @@ show_low_sales_button = st.sidebar.button("Show Items with Sales < 20")
 
 if file1 and file2:
     try:
-        # Read the Excel files
+        # Read the Excel files using openpyxl engine
         df1 = pd.read_excel(file1, engine='openpyxl')
         df2 = pd.read_excel(file2, engine='openpyxl')
 
@@ -38,12 +38,13 @@ if file1 and file2:
         if "quantity" in df1.columns and "item" in df1.columns and \
            "quantity" in df2.columns and "item" in df2.columns:
 
-            # Convert quantity columns to numeric, handling missing values
-            df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(int)
-            df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(int)
+            # Convert quantity columns to numeric, handling large integers
+            df1["quantity"] = pd.to_numeric(df1["quantity"], errors='coerce').fillna(0).astype(np.int64)
+            df2["quantity"] = pd.to_numeric(df2["quantity"], errors='coerce').fillna(0).astype(np.int64)
 
-            # Debugging: Display unique values in quantity
-            st.write("Unique values in df2['quantity']:", df2["quantity"].unique())
+            # Debugging: Check for large values
+            st.write("Maximum value in df1['quantity']:", df1["quantity"].max())
+            st.write("Maximum value in df2['quantity']:", df2["quantity"].max())
 
             # Filter data based on sales quantities
             df1_filtered = df1[df1["quantity"] >= quantity1]
@@ -51,13 +52,15 @@ if file1 and file2:
             # Extract matched items from the first file
             matched_items = df1_filtered["item"].unique()
 
-            # Debugging: Display matched items
-            st.write("Matched items from the first file:", matched_items)
+            # Debugging: Check matched_items
+            st.write("Debugging: Matched items from the first file", matched_items)
 
             # Filter the second file for items matching the first file's filtered results
             df2_filtered = df2[
                 (df2["item"].isin(matched_items)) &
-                ((df2["quantity"] <= quantity2) | (df2["quantity"] <= 0))
+                (
+                    (df2["quantity"] <= quantity2) | (df2["quantity"] <= 0)
+                )
             ]
 
             # Debugging: Check the filtered DataFrame
